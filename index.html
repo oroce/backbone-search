@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Search</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<!-- Le styles -->
+		<link href="/assets/css/bootstrap.css" rel="stylesheet">
+		<style>
+			body {
+				padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+			}
+			.keyword{
+				cursor: pointer;
+			}
+			#suggestions{
+				margin-top: 50px;
+			}
+		</style>
+		<link href="/assets/css/bootstrap-responsive.css" rel="stylesheet">
+	</head>
+
+	<body>
+
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<a class="brand" href="/">Search test</a>
+				</div>
+			</div>
+		</div>
+
+		<div class="container">
+			<div class="row">
+				<div class="span12" id="search-container">
+					<span class="keyword-list"></span>
+					<input type="search" class="search-keyword" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="span12" id="suggestions">
+
+				</div>
+			</div>
+		</div>
+		<script type="text/tmpl" class="added-keyword-tmpl">
+			<span class="btn keyword" data-id="<%= keyword.id %>">
+				<%= keyword.item %>
+				<i class="icon-remove"></i>
+			</span>
+		</script>
+		<script type="text/tmpl" class="suggestion-tmpl">
+			<span class="btn select-suggestion" data-id="<%= suggestion.id %>"><%= suggestion.item %></span>
+		</script>
+		<script src="/assets/js/jquery.js"></script>
+		<script src="/assets/js/underscore.js"></script>
+		<script src="/assets/js/backbone.js"></script>
+		<script src="/assets/js/app.js"></script>
+	</body>
+</html>
