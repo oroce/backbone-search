@@ -20,6 +20,12 @@
 			#suggestions{
 				margin-top: 50px;
 			}
+			.select-suggestion span.label{
+				position: relative;
+				top: -7px;
+				right: -12px;
+				font-size: 10px;
+			}
 		</style>
 		<link href="assets/css/bootstrap-responsive.css" rel="stylesheet">
 	</head>
@@ -48,13 +54,16 @@
 			</div>
 		</div>
 		<script type="text/tmpl" class="added-keyword-tmpl">
-			<span class="btn keyword" data-id="<%= keyword.id %>">
+			<span class="btn keyword" data-cid="<%= keyword.cid %>">
 				<%= keyword.item %>
 				<i class="icon-remove"></i>
 			</span>
 		</script>
 		<script type="text/tmpl" class="suggestion-tmpl">
-			<span class="btn select-suggestion" data-id="<%= suggestion.id %>"><%= suggestion.item %></span>
+			<span class="btn select-suggestion" data-cid="<%= suggestion.cid %>">
+				<%= suggestion.item %>
+				<span class="label <%= suggestion.type === 'ac' ? 'label-info' : 'label-success' %>"><%=suggestion.type === "ac" ? "autocomplete" : "suggestion"%></span>
+			</span>
 		</script>
 		<script src="assets/js/jquery.js"></script>
 		<script src="assets/js/underscore.js"></script>

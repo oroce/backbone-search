@@ -5,9 +5,16 @@ var initialSuggestions = Array(10).join(0).split(0).map(function( item, i ){
 		item: "Label#"+i
 	};
 });
-
+var SearchSuggestionModel = Backbone.Model.extend({
+	toJSON: function(){
+		this.attributes.cid = this.cid;
+		return Backbone.Model.prototype.toJSON.apply( this, arguments );
+	}
+});
 var SearchSuggestionCollection = Backbone.Collection.extend({
-	fetch: function( options ){
+	model: SearchSuggestionModel,
+	url: "http://purposelabs.co:3000/search",
+	___fetch: function( options ){
 		options || (options = {});
 
 		var self = this;
@@ -34,7 +41,11 @@ var SearchView = Backbone.View.extend({
 		this.searchKeywordsCollection = new SearchKeywordsCollection();
 		this.searchSuggestionCollection = new SearchSuggestionCollection();
 
-		this.searchSuggestionCollection.on( "reset remove", this.renderSuggestions, this );
+		this.searchSuggestionCollection
+			.on( "reset remove", this.renderSuggestions, this )
+			.on( "error", function(){
+				window.console ? console.log( "error", arguments ) : void 0;
+			});
 
 		this.searchKeywordsCollection
 			.on( "add", this.addKeyword, this )
@@ -54,10 +65,11 @@ var SearchView = Backbone.View.extend({
 			return;
 		}
 		this.searchSuggestionCollection.fetch({
-			without: this.searchKeywordsCollection.toJSON(),
 			data: {
-				q: val
-			}
+				q: val,
+				without: this.searchKeywordsCollection.pluck( "item" )
+			},
+			reset: true
 		});
 	},
 	keywordTmpl: _.template( $( ".added-keyword-tmpl" ).text() ),
@@ -73,13 +85,17 @@ var SearchView = Backbone.View.extend({
 	addToKeyword: function( e ){
 		var el = $( e.currentTarget );
 
-		var id = el.data( "id" );
+		var id = el.data( "cid" );
 
 		var suggestion = this.searchSuggestionCollection.get( id );
 		if( suggestion ){
+
 			this.searchKeywordsCollection.add( suggestion );
 			this.searchSuggestionCollection.remove( suggestion );
-			this.$( ".search-keyword" ).val( "" );
+			if( suggestion.get("type") === "ac" ){
+				this.$( ".search-keyword" ).val( "" );
+			}
+			this.$( ".search-keyword" ).focus();
 		}
 	},
 	renderKeywords: function(){
@@ -93,7 +109,7 @@ var SearchView = Backbone.View.extend({
 	removeKeyword: function( e ){
 		var el = $( e.currentTarget );
 
-		var id = el.data( "id" );
+		var id = el.data( "cid" );
 
 		var keyword = this.searchKeywordsCollection.get( id );
 
