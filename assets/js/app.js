@@ -13,24 +13,15 @@ var SearchSuggestionModel = Backbone.Model.extend({
 });
 var SearchSuggestionCollection = Backbone.Collection.extend({
 	model: SearchSuggestionModel,
-	url: "http://purposelabs.co:3000/search",
-	___fetch: function( options ){
-		options || (options = {});
-
-		var self = this;
-		setTimeout(function(){
-			var newItems = initialSuggestions
-			if( options.without ){
-				var withoutIds = _.pluck( options.without, "id" );
-				newItems = newItems.filter(function( item ){
-					return withoutIds.indexOf( item.id ) === -1;
-				})
-			}
-			self.reset( _.shuffle( newItems ) );
-		}, 10 );
-	}
+	url: "http://purposelabs.co:3000/search"
 });
 
+var VideoSuggestionCollection = Backbone.Collection.extend({
+	url: "http://purposelabs.co:3000/search/videos",
+	parse: function( response ){
+		return response.result;
+	}
+});
 var SearchView = Backbone.View.extend({
 	events: {
 		"keyup .search-keyword": "search",
@@ -40,7 +31,7 @@ var SearchView = Backbone.View.extend({
 	initialize: function(){
 		this.searchKeywordsCollection = new SearchKeywordsCollection();
 		this.searchSuggestionCollection = new SearchSuggestionCollection();
-
+		this.videoSuggestionCollection = new VideoSuggestionCollection();
 		this.searchSuggestionCollection
 			.on( "reset remove", this.renderSuggestions, this )
 			.on( "error", function(){
@@ -51,11 +42,27 @@ var SearchView = Backbone.View.extend({
 			.on( "add", this.addKeyword, this )
 			.on( "reset", this.renderKeywords, this );
 
+		this.videoSuggestionCollection
+			.on( "reset", this.renderVideos, this );
 
 		this.suggestionEl = $( "#suggestions" );
 		this.keywordListEl = $( ".keyword-list" );
+		this.videoEl = $( "#video-container" );
+		this.$( ".search-keyword" ).focus();
 	},
+	fetchVideo: function( val ){
+		if( this.videoXhr ){
+			this.videoXhr.abort();
+		}
 
+		this.videoXhr = this.videoSuggestionCollection
+			.fetch({
+				data: {
+					q: _.compact( _.union( this.searchKeywordsCollection.pluck( "item" ), val ) )
+				},
+				reset: true
+			});
+	},
 	search: function( e ){
 		var el = $( e.currentTarget );
 
@@ -71,9 +78,11 @@ var SearchView = Backbone.View.extend({
 			},
 			reset: true
 		});
+		this.fetchVideo( val );
 	},
 	keywordTmpl: _.template( $( ".added-keyword-tmpl" ).text() ),
 	suggestionTmpl: _.template( $( ".suggestion-tmpl" ).text() ),
+	videoTmpl: _.template( $( ".video-tmpl" ).text() ),
 	renderSuggestions: function(){
 		this.suggestionEl.empty();
 
@@ -96,6 +105,7 @@ var SearchView = Backbone.View.extend({
 				this.$( ".search-keyword" ).val( "" );
 			}
 			this.$( ".search-keyword" ).focus();
+			this.fetchVideo( this.$( ".search-keyword" ).val() );
 		}
 	},
 	renderKeywords: function(){
@@ -118,10 +128,18 @@ var SearchView = Backbone.View.extend({
 			this.searchSuggestionCollection.add( keyword ).trigger( "reset" );
 
 		}
+	},
+	renderVideo: function( model ){
+		this.videoEl.append( this.videoTmpl({ video: model.toJSON() }));
+	},
+	renderVideos: function(){
+		this.videoEl.empty();
+		this.videoSuggestionCollection.each( this.renderVideo, this );
 	}
 });
 var App = {};
-
-App.searchView = new SearchView({
-	el: ".container"
-});
+$(function(){
+	App.searchView = new SearchView({
+		el: ".container"
+	});
+})

@@ -26,6 +26,12 @@
 				right: -12px;
 				font-size: 10px;
 			}
+			#video-container{
+				margin-top: 20px;
+			}
+			.video-item {
+				margin-bottom: 20px;
+			}
 		</style>
 		<link href="assets/css/bootstrap-responsive.css" rel="stylesheet">
 	</head>
@@ -52,6 +58,11 @@
 
 				</div>
 			</div>
+			<div class="row">
+				<div class="span12">
+					<div class="row" id="video-container"></div>
+				</div>
+			</div>
 		</div>
 		<script type="text/tmpl" class="added-keyword-tmpl">
 			<span class="btn keyword" data-cid="<%= keyword.cid %>">
@@ -64,6 +75,25 @@
 				<%= suggestion.item %>
 				<span class="label <%= suggestion.type === 'ac' ? 'label-info' : 'label-success' %>"><%=suggestion.type === "ac" ? "autocomplete" : "suggestion"%></span>
 			</span>
+		</script>
+		<script type="text/tmpl" class="video-tmpl">
+			<div class="span4 video-item">
+				<div class="row">
+					<div class="span4">
+						<center>
+							<img src="./assets/img/nopreview.jpg" width=360 />
+						</center>
+					</div>
+					<div class="span4">
+						<a href="/video/<%= video.id %>" target="_blank" ><p><%= video.title %></p></a>
+					</div>
+					<div class="span4">
+						<% _( video.tags ).each(function( tag ){ %>
+							<div class="label label-info"><%= tag %></div>
+						<% }) %>
+					</div>
+				</div>
+			</div>
 		</script>
 		<script src="assets/js/jquery.js"></script>
 		<script src="assets/js/underscore.js"></script>
